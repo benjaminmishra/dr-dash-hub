@@ -9,28 +9,26 @@ import { ArrowLeft } from "lucide-react";
 interface AuthProps {
   mode: 'login' | 'signup';
   onBack: () => void;
-  onLogin: (email: string, password: string) => void;
-  onSignUp: (email: string, password: string) => void;
+  onAuth: (email: string, password: string, isSignUp: boolean) => Promise<void>;
   onModeChange: (mode: 'login' | 'signup') => void;
 }
 
-export const Auth = ({ mode, onBack, onLogin, onSignUp, onModeChange }: AuthProps) => {
+export const Auth = ({ mode, onBack, onAuth, onModeChange }: AuthProps) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setError(null);
     
     try {
-      if (mode === 'login') {
-        await onLogin(email, password);
-      } else {
-        await onSignUp(email, password);
-      }
-    } catch (error) {
+      await onAuth(email, password, mode === 'signup');
+    } catch (error: any) {
       console.error('Auth error:', error);
+      setError(error.message || 'An error occurred during authentication');
     } finally {
       setIsLoading(false);
     }
@@ -66,6 +64,12 @@ export const Auth = ({ mode, onBack, onLogin, onSignUp, onModeChange }: AuthProp
             
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-4">
+                {error && (
+                  <div className="bg-destructive/10 border border-destructive/20 text-destructive px-4 py-3 rounded-md text-sm">
+                    {error}
+                  </div>
+                )}
+                
                 <div className="space-y-2">
                   <Label htmlFor="email">Email</Label>
                   <Input
@@ -89,6 +93,7 @@ export const Auth = ({ mode, onBack, onLogin, onSignUp, onModeChange }: AuthProp
                     onChange={(e) => setPassword(e.target.value)}
                     required
                     className="h-11"
+                    minLength={6}
                   />
                 </div>
 
