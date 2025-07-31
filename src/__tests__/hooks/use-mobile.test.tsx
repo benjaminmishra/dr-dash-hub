@@ -6,16 +6,16 @@ describe('useIsMobile Hook', () => {
   const originalMatchMedia = window.matchMedia;
   
   // Mock for matchMedia
-  const mockMatchMedia = (matches: boolean) => {
+  const mockMatchMedia = (matches: boolean, cbStore?: (cb: any) => void) => {
     window.matchMedia = jest.fn().mockImplementation((query) => {
       return {
         matches,
         media: query,
         onchange: null,
-        addEventListener: jest.fn(),
+        addEventListener: (ev: string, cb: any) => cbStore?.(cb),
         removeEventListener: jest.fn(),
         dispatchEvent: jest.fn(),
-      };
+      } as any;
     });
   };
   
@@ -48,23 +48,18 @@ describe('useIsMobile Hook', () => {
   test('updates value when window size changes', () => {
     // Start with desktop size
     window.innerWidth = 1024;
-    mockMatchMedia(false);
-    
+    let changeCb: any;
+    mockMatchMedia(false, (cb) => (changeCb = cb));
+
     const { result } = renderHook(() => useIsMobile());
     expect(result.current).toBe(false);
-    
-    // Simulate resize to mobile size
+
     act(() => {
       window.innerWidth = 600;
-      // Simulate the matchMedia change event
-      const mqlChangeEvent = new Event('change');
-      window.dispatchEvent(mqlChangeEvent);
+      changeCb?.({ matches: true });
     });
-    
-    // The hook should update to reflect the new window size
-    // Note: In a real test environment, this might not work as expected
-    // because jsdom doesn't actually resize. This is more of a conceptual test.
-    expect(window.innerWidth).toBe(600);
+
+    expect(result.current).toBe(true);
   });
   
   test('adds and removes event listener on mount and unmount', () => {
