@@ -1,13 +1,14 @@
-name: Test and Coverage
+name: Build, Test and Coverage
 
 on:
   push:
     branches: [ main, add-tests ]
   pull_request:
     branches: [ main ]
+    types: [opened, synchronize, reopened]
 
 jobs:
-  test:
+  build-and-test:
     runs-on: ubuntu-latest
 
     steps:
@@ -21,6 +22,15 @@ jobs:
     
     - name: Install dependencies
       run: npm ci
+    
+    - name: Build application
+      run: npm run build
+      
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-output
+        path: dist/
     
     - name: Run tests with coverage
       run: npm test -- --coverage
