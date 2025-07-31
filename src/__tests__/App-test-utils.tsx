@@ -2,8 +2,9 @@ import React, { ReactElement } from 'react';
 import { render, RenderOptions } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { TooltipProvider } from '@/components/ui/tooltip';
+import { MemoryRouter } from 'react-router-dom';
 
-// Create a custom render function that includes providers but NOT BrowserRouter
+// Create a custom render function that includes all necessary providers
 const AppProviders = ({ children }: { children: React.ReactNode }) => {
   const queryClient = new QueryClient({
     defaultOptions: {
@@ -16,7 +17,9 @@ const AppProviders = ({ children }: { children: React.ReactNode }) => {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        {children}
+        <MemoryRouter>
+          {children}
+        </MemoryRouter>
       </TooltipProvider>
     </QueryClientProvider>
   );
