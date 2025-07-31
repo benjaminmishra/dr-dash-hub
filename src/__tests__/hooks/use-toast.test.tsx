@@ -2,19 +2,15 @@ import { renderHook, act } from '@testing-library/react';
 import { useToast } from '@/hooks/use-toast';
 import { ToastActionElement } from '@/components/ui/toast';
 
-// Mock the toast context
-jest.mock('@/components/ui/toast', () => {
-  const actual = jest.requireActual('@/components/ui/toast');
-  return {
-    ...actual,
-    useToast: () => ({
-      toast: jest.fn(),
-      dismiss: jest.fn(),
-    }),
-  };
-});
+// Don't mock the toast hook, we want to test the actual implementation
+jest.unmock('@/hooks/use-toast');
 
 describe('useToast Hook', () => {
+  beforeEach(() => {
+    // Reset the toast state between tests
+    jest.clearAllMocks();
+  });
+
   test('toast function returns expected toast object', () => {
     const { result } = renderHook(() => useToast());
     
@@ -30,9 +26,15 @@ describe('useToast Hook', () => {
     
     // Check if the returned toast object has the expected properties
     expect(toast).toHaveProperty('id');
-    expect(toast).toHaveProperty('title', 'Test Title');
-    expect(toast).toHaveProperty('description', 'Test Description');
-    expect(toast).toHaveProperty('variant', 'default');
+    expect(toast).toHaveProperty('dismiss');
+    expect(toast).toHaveProperty('update');
+    
+    // The toast function doesn't return the toast properties, only control functions
+    // Let's check if the toast was added to the state
+    expect(result.current.toasts.length).toBeGreaterThan(0);
+    const addedToast = result.current.toasts[0];
+    expect(addedToast.title).toBe('Test Title');
+    expect(addedToast.description).toBe('Test Description');
   });
   
   test('toast function with action', () => {
@@ -42,7 +44,7 @@ describe('useToast Hook', () => {
       altText: 'Test Alt Text',
       onClick: jest.fn(),
       children: 'Action',
-    };
+    } as any;
     
     let toast;
     act(() => {
@@ -53,22 +55,15 @@ describe('useToast Hook', () => {
       });
     });
     
-    expect(toast).toHaveProperty('action');
-    expect(toast.action).toBe(action);
+    // Check if the action was added to the toast in the state
+    const addedToast = result.current.toasts[0];
+    expect(addedToast.action).toBe(action);
   });
   
   test('toast function with different variants', () => {
     const { result } = renderHook(() => useToast());
     
-    let successToast, destructiveToast;
-    
-    act(() => {
-      successToast = result.current.toast({
-        title: 'Success',
-        description: 'Operation successful',
-        variant: 'success',
-      });
-    });
+    let destructiveToast;
     
     act(() => {
       destructiveToast = result.current.toast({
@@ -78,8 +73,8 @@ describe('useToast Hook', () => {
       });
     });
     
-    expect(successToast).toHaveProperty('variant', 'success');
-    expect(destructiveToast).toHaveProperty('variant', 'destructive');
+    // Check the variant in the state
+    expect(result.current.toasts[0].variant).toBe('destructive');
   });
   
   test('dismiss function', () => {
@@ -93,14 +88,17 @@ describe('useToast Hook', () => {
       });
     });
     
+    // Get the initial count of toasts
+    const initialCount = result.current.toasts.length;
+    
     // Dismiss the toast
     act(() => {
       result.current.dismiss(toast.id);
     });
     
-    // Since we're mocking the actual dismiss function, we can't test its effect
-    // But we can at least ensure the function doesn't throw
-    expect(true).toBe(true);
+    // The toast should be marked as closed but not removed immediately
+    expect(result.current.toasts.length).toBe(initialCount);
+    expect(result.current.toasts[0].open).toBe(false);
   });
   
   test('toast function with custom duration', () => {
@@ -115,6 +113,8 @@ describe('useToast Hook', () => {
       });
     });
     
-    expect(toast).toHaveProperty('duration', 5000);
+    // Check if the duration was added to the toast in the state
+    const addedToast = result.current.toasts[0];
+    expect(addedToast.duration).toBe(5000);
   });
 });
