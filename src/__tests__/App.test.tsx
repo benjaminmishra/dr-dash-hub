@@ -258,6 +258,29 @@ describe('App Component', () => {
     });
   });
   
+  test('handles login error', async () => {
+    // Mock login error
+    mockSupabase.auth.signInWithPassword.mockImplementation(() => 
+      Promise.resolve({ data: { session: null, user: null }, error: { message: 'Invalid credentials' } })
+    );
+    
+    render(<App />);
+    
+    // Wait for the landing page to render
+    await waitFor(() => {
+      expect(screen.getByTestId('landing-page')).toBeInTheDocument();
+    });
+    
+    // Navigate to login page
+    screen.getByText('Login').click();
+    
+    // Submit the login form
+    screen.getByText('Submit').click();
+    
+    // Check if signInWithPassword was called
+    expect(mockSupabase.auth.signInWithPassword).toHaveBeenCalled();
+  });
+  
   test('handles signup submission', async () => {
     // Mock successful signup
     mockSupabase.auth.signUp.mockImplementation(() => 
@@ -285,6 +308,67 @@ describe('App Component', () => {
         emailRedirectTo: expect.any(String)
       }
     });
+  });
+  
+  test('handles signup error', async () => {
+    // Mock signup error
+    mockSupabase.auth.signUp.mockImplementation(() => 
+      Promise.resolve({ data: { session: null, user: null }, error: { message: 'Email already in use' } })
+    );
+    
+    render(<App />);
+    
+    // Wait for the landing page to render
+    await waitFor(() => {
+      expect(screen.getByTestId('landing-page')).toBeInTheDocument();
+    });
+    
+    // Navigate to signup page
+    screen.getByText('Sign Up').click();
+    
+    // Submit the signup form
+    screen.getByText('Submit').click();
+    
+    // Check if signUp was called
+    expect(mockSupabase.auth.signUp).toHaveBeenCalled();
+  });
+  
+  test('handles account deletion confirmation canceled', async () => {
+    // Mock authenticated session
+    mockSupabase.auth.getSession.mockImplementation(() => 
+      Promise.resolve({ data: { session: mockSession } })
+    );
+    
+    // Mock window.confirm to return false (cancel)
+    const originalConfirm = window.confirm;
+    window.confirm = jest.fn(() => false);
+    
+    render(<App />);
+    
+    // Wait for the dashboard page to render
+    await waitFor(() => {
+      expect(screen.getByTestId('dashboard-page')).toBeInTheDocument();
+    });
+    
+    // Navigate to settings page
+    screen.getByText('Settings').click();
+    
+    // Check if settings page is rendered
+    expect(screen.getByTestId('settings-page')).toBeInTheDocument();
+    
+    // Click on the delete account button
+    screen.getByText('Delete Account').click();
+    
+    // Check if confirm was called
+    expect(window.confirm).toHaveBeenCalledWith(
+      'Are you sure you want to delete your account? This action cannot be undone.'
+    );
+    
+    // Check if signOut was NOT called since we canceled
+    expect(mockSupabase.auth.signOut).not.toHaveBeenCalled();
+    
+    // Restore original confirm
+    window.confirm = originalConfirm;
   });
   
   test('navigates to settings page from dashboard', async () => {
