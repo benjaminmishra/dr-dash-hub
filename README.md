@@ -1,4 +1,9 @@
-# Welcome to your Lovable project
+# Dr. Dash Hub
+
+[![Test and Coverage](https://github.com/benjaminmishra/dr-dash-hub/actions/workflows/test-coverage.yml/badge.svg)](https://github.com/benjaminmishra/dr-dash-hub/actions/workflows/test-coverage.yml)
+[![codecov](https://codecov.io/gh/benjaminmishra/dr-dash-hub/branch/main/graph/badge.svg)](https://codecov.io/gh/benjaminmishra/dr-dash-hub)
+
+A modern dashboard application built with React, TypeScript, and shadcn-ui.
 
 ## Project info
 
