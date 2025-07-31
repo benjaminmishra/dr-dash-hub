@@ -5,19 +5,19 @@ import { Label } from "@/components/ui/label";
 import { Navbar } from "@/components/Navbar";
 import { useState } from "react";
 import { ArrowLeft } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 
 interface AuthProps {
   mode: 'login' | 'signup';
-  onBack: () => void;
-  onAuth: (email: string, password: string, isSignUp: boolean) => Promise<void>;
-  onModeChange: (mode: 'login' | 'signup') => void;
 }
 
-export const Auth = ({ mode, onBack, onAuth, onModeChange }: AuthProps) => {
+export const Auth = ({ mode }: AuthProps) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,7 +25,12 @@ export const Auth = ({ mode, onBack, onAuth, onModeChange }: AuthProps) => {
     setError(null);
     
     try {
-      await onAuth(email, password, mode === 'signup');
+      if (mode === 'signup') {
+        await supabase.auth.signUp({ email, password });
+      } else {
+        await supabase.auth.signInWithPassword({ email, password });
+      }
+      navigate('/dashboard');
     } catch (error: any) {
       console.error('Auth error:', error);
       setError(error.message || 'An error occurred during authentication');
@@ -42,7 +47,7 @@ export const Auth = ({ mode, onBack, onAuth, onModeChange }: AuthProps) => {
         <div className="max-w-md mx-auto">
           <Button
             variant="ghost"
-            onClick={onBack}
+            onClick={() => navigate('/')}
             className="mb-6 -ml-2"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
@@ -111,7 +116,7 @@ export const Auth = ({ mode, onBack, onAuth, onModeChange }: AuthProps) => {
                   {mode === 'login' ? "Don't have an account?" : "Already have an account?"}
                   <Button
                     variant="link"
-                    onClick={() => onModeChange(mode === 'login' ? 'signup' : 'login')}
+                    onClick={() => navigate(mode === 'login' ? '/signup' : '/login')}
                     className="ml-1 p-0 h-auto"
                   >
                     {mode === 'login' ? 'Sign up' : 'Sign in'}

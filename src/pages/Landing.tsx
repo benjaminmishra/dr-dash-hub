@@ -3,13 +3,10 @@ import { TLDRCard } from "@/components/TLDRCard";
 import { Navbar } from "@/components/Navbar";
 import { Clock, Zap, Target } from "lucide-react";
 import heroImage from "@/assets/hero-image.jpg";
+import { useNavigate } from "react-router-dom";
 
-interface LandingProps {
-  onSignUp: () => void;
-  onLogin: () => void;
-}
-
-export const Landing = ({ onSignUp, onLogin }: LandingProps) => {
+export const Landing = () => {
+  const navigate = useNavigate();
   // Example TLDR for demonstration
   const exampleTLDR = {
     id: "example-1",
@@ -25,7 +22,7 @@ export const Landing = ({ onSignUp, onLogin }: LandingProps) => {
 
   return (
     <div className="min-h-screen bg-white">
-      <Navbar onSignUp={onSignUp} onLogin={onLogin} />
+      <Navbar onSignUp={() => navigate('/signup')} onLogin={() => navigate('/login')} />
       
       {/* Hero Section */}
       <section className="relative overflow-hidden">
@@ -47,7 +44,7 @@ export const Landing = ({ onSignUp, onLogin }: LandingProps) => {
               </div>
 
               <div className="flex flex-col sm:flex-row gap-4">
-                <Button variant="hero" size="lg" onClick={onSignUp} className="text-lg px-8 py-6">
+                <Button variant="hero" size="lg" onClick={() => navigate('/signup')} className="text-lg px-8 py-6">
                   Get Started for Free
                 </Button>
                 <Button variant="outline" size="lg" className="text-lg px-8 py-6">
@@ -101,7 +98,7 @@ export const Landing = ({ onSignUp, onLogin }: LandingProps) => {
             </div>
 
             <div className="text-center mt-12">
-              <Button variant="hero" size="lg" onClick={onSignUp} className="text-lg px-8 py-6">
+              <Button variant="hero" size="lg" onClick={() => navigate('/signup')} className="text-lg px-8 py-6">
                 Start Reading Smarter Today
               </Button>
             </div>

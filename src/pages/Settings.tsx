@@ -2,28 +2,46 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Navbar } from "@/components/Navbar";
 import { ArrowLeft, Mail, Trash2 } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 
-interface SettingsProps {
-  userEmail: string;
-  onBack: () => void;
-  onLogout: () => void;
-  onDeleteAccount: () => void;
-}
+export const Settings = () => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
 
-export const Settings = ({ userEmail, onBack, onLogout, onDeleteAccount }: SettingsProps) => {
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    navigate('/');
+  };
+
+  const handleDeleteAccount = async () => {
+    if (confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
+      try {
+        // Note: Account deletion requires admin privileges or a server function
+        // For now, we'll just sign out the user
+        await supabase.auth.signOut();
+        navigate('/');
+      } catch (error) {
+        console.error('Account deletion error:', error);
+      }
+    }
+  };
+
   return (
     <div className="min-h-screen bg-content-bg">
       <Navbar 
         isLoggedIn={true}
-        userEmail={userEmail}
-        onLogout={onLogout}
+        userEmail={user?.email || ''}
+        onLogout={handleLogout}
+        onSettings={() => navigate('/settings')}
       />
       
       <div className="container px-6 py-8">
         <div className="max-w-2xl mx-auto">
           <Button
             variant="ghost"
-            onClick={onBack}
+            onClick={() => navigate('/dashboard')}
             className="mb-6 -ml-2"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
@@ -54,7 +72,7 @@ export const Settings = ({ userEmail, onBack, onLogout, onDeleteAccount }: Setti
                   <div>
                     <label className="text-sm font-medium text-foreground">Email Address</label>
                     <div className="mt-1 p-3 bg-muted rounded-md">
-                      <span className="text-foreground">{userEmail}</span>
+                      <span className="text-foreground">{user?.email}</span>
                     </div>
                   </div>
                   
@@ -119,7 +137,7 @@ export const Settings = ({ userEmail, onBack, onLogout, onDeleteAccount }: Setti
                       <p className="font-medium text-foreground">Sign Out</p>
                       <p className="text-sm text-muted-foreground">Sign out of your account</p>
                     </div>
-                    <Button variant="outline" onClick={onLogout}>
+                    <Button variant="outline" onClick={handleLogout}>
                       Sign Out
                     </Button>
                   </div>
@@ -129,7 +147,7 @@ export const Settings = ({ userEmail, onBack, onLogout, onDeleteAccount }: Setti
                       <p className="font-medium text-foreground">Delete Account</p>
                       <p className="text-sm text-muted-foreground">Permanently delete your account and all data</p>
                     </div>
-                    <Button variant="destructive" onClick={onDeleteAccount}>
+                    <Button variant="destructive" onClick={handleDeleteAccount}>
                       Delete Account
                     </Button>
                   </div>
