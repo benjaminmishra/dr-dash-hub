@@ -4,7 +4,11 @@
 [![Pull Request Checks](https://github.com/benjaminmishra/dr-dash-hub/actions/workflows/pr-checks.yml/badge.svg)](https://github.com/benjaminmishra/dr-dash-hub/actions/workflows/pr-checks.yml)
 [![codecov](https://codecov.io/gh/benjaminmishra/dr-dash-hub/graph/badge.svg?token=1eb8d5f4-4923-44d2-94f6-73de42f2a44f)](https://codecov.io/gh/benjaminmishra/dr-dash-hub)
 
-A modern dashboard application built with React, TypeScript, and shadcn-ui.
+## Purpose of this project
+
+Vibe coding in short. 
+
+Long story : I got  curios to see what is all the fuss about vibe coding and coded this up using Codex and Gemini CLI agents with pure english and not a single line of code. Turned out quite well, although it is not there yet and AI seems to be getting really bad at handling the codebase now that it requires more and more specific instructions. For now I am going to pause working on this and then revisit this in a few weeks to see if AI has gotten any better.
 
 ## Project info
 
